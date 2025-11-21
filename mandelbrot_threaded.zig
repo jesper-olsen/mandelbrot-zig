@@ -10,7 +10,6 @@
 /// ./mandelbrot_threaded
 /// ./mandelbrot_threaded width=120 ll_x=-0.75 ll_y=0.1 ur_x=-0.74 ur_y=0.11
 /// ./mandelbrot_threaded png=1 width=800 height=600 > mandelbrot.dat
-
 const std = @import("std");
 
 const NUM_THREADS = 9; // Adjust based on CPU core count
