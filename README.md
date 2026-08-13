@@ -9,20 +9,22 @@ The program compiles to a single native executable. It can render the Mandelbrot
 This project compares the performance and features of Mandelbrot set generation in different languages.
 Single Thread/Multi-thread shows the number of seconds it takes to do a 5000x5000 calculation.
 
-| Language    | Repository                                                         | Single Thread   | Multi-Thread |
-| :--------   | :----------------------------------------------------------------- | ---------------:| -----------: |
-| Awk         | [mandelbrot-awk](https://github.com/jesper-olsen/mandelbrot-awk)   |           805.9 |              |
-| C           | [mandelbrot-c](https://github.com/jesper-olsen/mandelbrot-c)       |             6.9 |          1.4 |
-| Erlang      | [mandelbrot_erl](https://github.com/jesper-olsen/mandelbrot_erl)   |            56.0 |           16 |
-| Fortran     | [mandelbrot-f](https://github.com/jesper-olsen/mandelbrot-f)       |            11.6 |              |
-| Lua         | [mandelbrot-lua](https://github.com/jesper-olsen/mandelbrot-lua)   |           158.2 |              |
-| Mojo        | [mandelbrot-mojo](https://github.com/jesper-olsen/mandelbrot-mojo) |            39.6 |         39.2 |
-| Nushell     | [mandelbrot-nu](https://github.com/jesper-olsen/mandelbrot-nu)     |   (est) 11488.5 |              |
-| Python      | [mandelbrot-py](https://github.com/jesper-olsen/mandelbrot-py)     |    (pure) 177.2 | (jax)    7.5 |
-| R           | [mandelbrot-R](https://github.com/jesper-olsen/mandelbrot-R)       |           562.0 |              |
-| Rust        | [mandelbrot-rs](https://github.com/jesper-olsen/mandelbrot-rs)     |             8.4 |          2.2 |
-| Tcl         | [mandelbrot-tcl](https://github.com/jesper-olsen/mandelbrot-tcl)   |           706.1 |              |
-| **Zig**     | [mandelbrot-zig](https://github.com/jesper-olsen/mandelbrot-zig)   |             8.6 |          1.9 |
+
+| Language    | Repository                                                         | Single Thread   | Multi-Thread | Simd | Multi-Thread + Simd |
+| :--------   | :----------------------------------------------------------------- | ---------------:| -----------: | ----:| ------------------: |
+| Awk         | [mandelbrot-awk](https://github.com/jesper-olsen/mandelbrot-awk)   |                 |              |      |                     |
+| C           | [mandelbrot-c](https://github.com/jesper-olsen/mandelbrot-c)       |             3.6 |          0.6 |  1.1 |               0.2   |
+| Erlang      | [mandelbrot_erl](https://github.com/jesper-olsen/mandelbrot_erl)   |                 |              |      |                     |
+| Fortran     | [mandelbrot-f](https://github.com/jesper-olsen/mandelbrot-f)       |                 |              |      |                     |
+| Lua         | [mandelbrot-lua](https://github.com/jesper-olsen/mandelbrot-lua)   |            33.2 |              |      |                     |
+| Mojo        | [mandelbrot-mojo](https://github.com/jesper-olsen/mandelbrot-mojo) |             3.8 |          1.2 |  0.7 |               0.4   |
+| Nushell     | [mandelbrot-nu](https://github.com/jesper-olsen/mandelbrot-nu)     |                 |              |      |                     |
+| Odin        | [mandelbrot-odin](https://github.com/jesper-olsen/mandelbrot-odin) |             4.4 |              |      |                     |
+| Python      | [mandelbrot-py](https://github.com/jesper-olsen/mandelbrot-py)     |                 |              |      |                     |
+| R           | [mandelbrot-R](https://github.com/jesper-olsen/mandelbrot-R)       |                 |              |      |                     |
+| Rust        | [mandelbrot-rs](https://github.com/jesper-olsen/mandelbrot-rs)     |             4.7 |          1.3 |      |                     |
+| Tcl         | [mandelbrot-tcl](https://github.com/jesper-olsen/mandelbrot-tcl)   |                 |              |      |                     |
+| **Zig**     | [mandelbrot-zig](https://github.com/jesper-olsen/mandelbrot-zig)   |             4.9 |          0.9 |  0.7 |               0.3   |
 
 ---
 
@@ -30,7 +32,7 @@ Single Thread/Multi-thread shows the number of seconds it takes to do a 5000x500
 
 You will need the following installed:
 
-1.  **Zig 0.15.2** (or compatible version).
+1.  **Zig 0.16.0** (or compatible version).
 2.  **Gnuplot** (required *only* for generating PNG images).
 
 ---
@@ -100,45 +102,41 @@ Benchmarks were run on an **Apple M1** system with Zig 0.15.2.
 
 **Generating a 1000x750 data file (single-threaded):**
 ```sh
-% time ./mandelbrot png=1 width=1000 height=750 > image.dat
-0.29s user 0.01s system 97% cpu 0.308 total
+time ./mandelbrot png=1 width=1000 height=750 > image.dat
+0.18s user 0.00s system 98% cpu 0.185 total
 ```
 
 **Generating a 5000x5000 data file (single-threaded):**
 ```sh
-% time ./mandelbrot png=1 width=5000 height=5000 > image.dat
-8.26s user 0.12s system 97% cpu 8.585 total
+time ./mandelbrot png=1 width=5000 height=5000 > image.dat
+4.83s user 0.05s system 99% cpu 4.897 total
+
 ```
 
 **Generating a 5000x5000 data file (multi-threaded, 9 threads):**
 ```sh
-% time ./mandelbrot_threaded png=1 width=5000 height=5000 > image.dat
-10.91s user 0.16s system 585% cpu 1.890 total
+time ./mandelbrot_threaded png=1 width=5000 height=5000 > image.dat
+6.69s user 0.10s system 744% cpu 0.912 total
 ```
 
-The multi-threaded version achieves approximately **4.5x speedup** over the single-threaded implementation, demonstrating excellent parallel scaling on the M1's performance cores.
+**Generating a 5000x5000 data file with SIMD (f32):**
+```sh
+time ./mandelbrot_simd_f32 png=1 width=5000 height=5000 > image.dat
+0.61s user 0.04s system 97% cpu 0.663 total
+```
+
+**Generating a 5000x5000 data file with SIMD and multi-threading:**
+```sh
+time ./mandelbrot_simd_threaded png=1 width=5000 height=5000 > image.dat
+1.94s user 0.07s system 563% cpu 0.356 total
+```
+
+**Generating a 5000x5000 data file with SIMD (f32) and multi-threading:**
+```sh
+time ./mandelbrot_simd_threaded_f32 png=1 width=5000 height=5000 > image.dat
+1.74s user 0.06s system 543% cpu 0.332 total
+```
+
+The multi-threaded version achieves approximately **5.4x speedup** over the single-threaded implementation.
 
 ---
-
-## Implementation Notes
-
-### Memory Safety
-Zig provides compile-time memory safety guarantees that eliminate entire classes of bugs common in C:
-- No buffer overflows
-- No null pointer dereferences
-- No use-after-free errors
-
-### Threading
-The multi-threaded implementation uses Zig's standard library threading primitives:
-- `std.Thread` for thread management
-- `std.atomic.Value` for lock-free work distribution
-- Dynamic work stealing via atomic fetch-and-add pattern
-
-### Performance
-Zig's `-O ReleaseFast` mode produces highly optimized machine code comparable to C's `-O3`:
-- Aggressive inlining of hot functions
-- SIMD optimizations where applicable
-- Minimal runtime overhead
-- Zero-cost abstractions
-
-The Zig implementation matches C's performance while providing better safety guarantees and a more modern development experience.

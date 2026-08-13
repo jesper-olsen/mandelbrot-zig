@@ -123,24 +123,23 @@ fn parse_arg(arg: []const u8, config: *Config, stderr: anytype) !void {
     }
 }
 
-pub fn main() !void {
+pub fn main(init: std.process.Init) !void {
+    const io = init.io;
     var config = Config{};
 
     // Set up buffered stdout
     var stdout_buffer: [8192]u8 = undefined;
-    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
+    var stdout_writer = std.Io.File.stdout().writer(io, &stdout_buffer);
     const stdout = &stdout_writer.interface;
 
     // Set up buffered stderr
     var stderr_buffer: [4096]u8 = undefined;
-    var stderr_writer = std.fs.File.stderr().writer(&stderr_buffer);
+    var stderr_writer = std.Io.File.stderr().writer(io, &stderr_buffer);
     const stderr = &stderr_writer.interface;
 
-    var args = try std.process.argsWithAllocator(std.heap.page_allocator);
-    defer args.deinit();
-
-    // Skip program name
-    _ = args.skip();
+    // Skip program name, then parse the rest
+    var args = init.minimal.args.iterate();
+    _ = args.next();
 
     while (args.next()) |arg| {
         try parse_arg(arg, &config, stderr);
@@ -152,7 +151,6 @@ pub fn main() !void {
         try ascii_output(config, stdout);
     }
 
-    // Flush the output buffer
     try stdout.flush();
     try stderr.flush();
 }

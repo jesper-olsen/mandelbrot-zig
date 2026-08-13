@@ -153,8 +153,10 @@ fn parse_arg(arg: []const u8, config: *Config, stderr: anytype) !void {
     }
 }
 
-pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+pub fn main(init: std.process.Init) !void {
+    const io = init.io;
+
+    var gpa = std.heap.DebugAllocator(.{}){};
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
@@ -162,17 +164,16 @@ pub fn main() !void {
 
     // Set up buffered I/O
     var stdout_buffer: [8192]u8 = undefined;
-    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
+    var stdout_writer = std.Io.File.stdout().writer(io, &stdout_buffer);
     const stdout = &stdout_writer.interface;
 
     var stderr_buffer: [4096]u8 = undefined;
-    var stderr_writer = std.fs.File.stderr().writer(&stderr_buffer);
+    var stderr_writer = std.Io.File.stderr().writer(io, &stderr_buffer);
     const stderr = &stderr_writer.interface;
 
     // Parse arguments
-    var args = try std.process.argsWithAllocator(allocator);
-    defer args.deinit();
-    _ = args.skip(); // Skip program name
+    var args = init.minimal.args.iterate();
+    _ = args.next(); // Skip program name
 
     while (args.next()) |arg| {
         try parse_arg(arg, &config, stderr);
@@ -182,11 +183,6 @@ pub fn main() !void {
     const total_pixels = @as(usize, @intCast(config.width * config.height));
     const result_buffer = try allocator.alloc(i32, total_pixels);
     defer allocator.free(result_buffer);
-
-    // Initialize thread pool
-    var pool: std.Thread.Pool = undefined;
-    try pool.init(.{ .allocator = allocator, .n_jobs = NUM_THREADS });
-    defer pool.deinit();
 
     // Atomic counter for distributing work
     var next_y = std.atomic.Value(i32).init(0);
@@ -198,17 +194,17 @@ pub fn main() !void {
         .next_y = &next_y,
     };
 
-    // Use WaitGroup to synchronize threads
-    var wg = std.Thread.WaitGroup{};
+    // Spawn worker tasks and wait for them to finish
+    var group: std.Io.Group = .init;
+    defer group.cancel(io);
 
-    // Spawn worker threads
     var i: usize = 0;
     while (i < NUM_THREADS) : (i += 1) {
-        pool.spawnWg(&wg, workerFunction, .{&ctx});
+        group.async(io, workerFunction, .{&ctx});
+        //try group.concurrent(io, workerFunction, .{&ctx});
     }
 
-    // Wait for all workers to complete
-    wg.wait();
+    try group.await(io);
 
     // Output results
     try finalOutput(&config, result_buffer, stdout);
