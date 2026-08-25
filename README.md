@@ -138,6 +138,10 @@ time ./mandelbrot_simd_threaded_f32 png=1 width=5000 height=5000 > image.dat
 1.74s user 0.06s system 543% cpu 0.332 total
 ```
 
-The multi-threaded version achieves approximately **5.4x speedup** over the single-threaded implementation.
+**Generating a 20000x20000 data file with SIMD (f32) and multi-threading:**
+```sh
+time ./mandelbrot_simd_threaded_f32 png=1 width=20000 height=20000 > image.dat
+image.dat  25.94s user 0.85s system 532% cpu 5.029 total
+```
 
 ---
