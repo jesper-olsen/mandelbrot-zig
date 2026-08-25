@@ -24,6 +24,7 @@ Single Thread/Multi-thread shows the number of seconds it takes to do a 5000x500
 | Python      | [mandelbrot-py](https://github.com/jesper-olsen/mandelbrot-py)     |                 |              |      |                     |
 | R           | [mandelbrot-R](https://github.com/jesper-olsen/mandelbrot-R)       |                 |              |      |                     |
 | Rust        | [mandelbrot-rs](https://github.com/jesper-olsen/mandelbrot-rs)     |             4.7 |          1.3 |      |                     |
+| Swift       | [mandelbrot-rs](https://github.com/jesper-olsen/mandelbrot-swift)  |             4.5 |              |      |                     |
 | Tcl         | [mandelbrot-tcl](https://github.com/jesper-olsen/mandelbrot-tcl)   |                 |              |      |                     |
 | **Zig**     | [mandelbrot-zig](https://github.com/jesper-olsen/mandelbrot-zig)   |             4.9 |          0.9 |  0.7 |               0.3   |
 
