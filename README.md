@@ -15,7 +15,7 @@ Single Thread/Multi-thread shows the number of seconds it takes to do a 5000x500
 | Awk         | [mandelbrot-awk](https://github.com/jesper-olsen/mandelbrot-awk)     |           417.9 |              |      |                     |
 | C           | [mandelbrot-c](https://github.com/jesper-olsen/mandelbrot-c)         |             3.6 |          0.6 |  0.7 |               0.2   |
 | Erlang      | [mandelbrot_erl](https://github.com/jesper-olsen/mandelbrot_erl)     |                 |              |      |                     |
-| Fortran     | [mandelbrot-f](https://github.com/jesper-olsen/mandelbrot-f)         |                 |              |      |                     |
+| Fortran     | [mandelbrot-f](https://github.com/jesper-olsen/mandelbrot-f)         |             4.5 |              |      |                     |
 | Java        | [mandelbrot-java](https://github.com/jesper-olsen/mandelbrot-java)   |             3.9 |          0.8 |  1.4 |               0.5   |
 | Lua         | [mandelbrot-lua](https://github.com/jesper-olsen/mandelbrot-lua)     |            33.2 |              |      |                     |
 | Mojo        | [mandelbrot-mojo](https://github.com/jesper-olsen/mandelbrot-mojo)   |             3.8 |          1.2 |  0.7 |               0.4   |
